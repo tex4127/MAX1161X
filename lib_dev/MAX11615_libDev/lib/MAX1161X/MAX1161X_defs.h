@@ -67,8 +67,8 @@
 #define MAX1161X_REG_SETUP                          0b0
 #define MAX1161X_REG_CONFIG                         0b1
 
-#define MAX1161X_SETUP_DEFAULT                      0b00000010
-#define MAX1161X_CONFIG_DEFAULT                     0b10000001
+#define MAX1161X_SETUP_DEFAULT                      0b10000010
+#define MAX1161X_CONFIG_DEFAULT                     0b00000001
 
 #define MAX1161X_SEL_VDDREF_INPUT_NC_IREFOFF        0b000
 #define MAX1161X_SEL_EXTREF_REFIN_REFIN_IREFOFF     0b010
@@ -139,9 +139,10 @@ struct MAX1161X_Dev_t{
     uint32_t conversionTime;
     float internalRef;
     float externalRef;
+    float VRef;
     void *intf_ptr;
     max1161x_read_fptr read;
-    max1161x_read_fptr write;
+    max1161x_write_fptr write;
     max1161x_delay_fptr delay;
 };
 
