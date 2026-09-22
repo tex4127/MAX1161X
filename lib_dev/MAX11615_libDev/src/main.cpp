@@ -40,7 +40,8 @@ void loop() {
   while(millis() - st < 1000){
     for (uint32_t i = 0; i<NUM_ICH; i++){
       int16_t counts = 0;
-      max11
+      if(MAX1161X_STATUS_OK != max1161x_readADC_singleEnded(i, &counts, &adc)) continue;
+      
     }
   }
 }

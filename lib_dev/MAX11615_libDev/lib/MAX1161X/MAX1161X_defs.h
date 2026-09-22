@@ -61,6 +61,9 @@
 #define MAX11616_I2C_ADDR                           0x35
 #define MAX11617_I2C_ADDR                           0x35
 
+#define MAX1161X_INTREF_2V048                       2.048f
+#define MAX1161X_INTREF_4V096                       4.096f
+
 #define MAX1161X_REG_SETUP                          0b0
 #define MAX1161X_REG_CONFIG                         0b1
 
@@ -134,6 +137,8 @@ struct MAX1161X_Dev_t{
     union MAX1161X_Setup_u setup;
     union MAX1161X_Config_u config;
     uint32_t conversionTime;
+    float internalRef;
+    float externalRef;
     void *intf_ptr;
     max1161x_read_fptr read;
     max1161x_read_fptr write;

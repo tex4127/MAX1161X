@@ -41,6 +41,7 @@
 
 static int8_t write_regs(const uint8_t *regData, uint32_t len, struct MAX1161X_Dev_t *dev);
 static int8_t read_regs(uint8_t *regData, uint32_t len, struct MAX1161X_Dev_t *dev);
+static float computeVoltage(int16_t counts, struct MAX1161X_Dev_t *dev);
 
 MAX1161X_INTF_RET_TYPE max11615_init(struct MAX1161X_Dev_t *dev){
     int8_t res = MAX1161X_STATUS_OK;
@@ -50,7 +51,9 @@ MAX1161X_INTF_RET_TYPE max11615_init(struct MAX1161X_Dev_t *dev){
     // Force set default register values
     dev->setup.byte = MAX1161X_SETUP_DEFAULT;
     dev->config.byte =  MAX1161X_CONFIG_DEFAULT;
-    // to test for connectivity, perform a soft reset
+    dev->internalRef = MAX1161X_INTREF_2V048;
+    dev->externalRef = 0.0f; //set with another API Call
+
     res = max1161x_softReset(dev);
     if(MAX1161X_STATUS_OK != res) return res;
     dev->conversionTime = (dev->setup.bits.clk == MAX1161X_CLK_INTERNAL) ? 8 : 11; //us
@@ -67,6 +70,12 @@ MAX1161X_INTF_RET_TYPE max1161x_setSetupByte(uint8_t setup, struct MAX1161X_Dev_
 MAX1161X_INTF_RET_TYPE max1161x_setConfigByte(uint8_t config, struct MAX1161X_Dev_t *dev){
     if (NULL == dev) return MAX1161X_E_NULL_PTR;
     dev->config.byte = config;
+    return MAX1161X_STATUS_OK;
+}
+
+MAX1161X_INTF_RET_TYPE max1161x_setExternalVRef(float vref, struct MAX1161X_Dev_t *dev){
+    if (NULL == dev) return MAX1161X_E_NULL_PTR;
+    dev->externalRef = vref;
     return MAX1161X_STATUS_OK;
 }
 
@@ -104,4 +113,10 @@ static int8_t read_regs(uint8_t *regData, uint32_t len, struct MAX1161X_Dev_t *d
     int8_t res = MAX1161X_STATUS_OK;
     res = dev->read(regData, len, dev->intf_ptr);
     return res;
+}
+
+static float computeVoltage(int16_t counts, struct MAX1151X_Dev_t *dev){
+    if (NULL == dev) return 0.0f;
+
+    return 0.0f;
 }

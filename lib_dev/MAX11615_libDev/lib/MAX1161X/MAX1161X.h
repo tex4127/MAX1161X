@@ -54,10 +54,11 @@ MAX1161X_INTF_RET_TYPE max1161x_setSetupByte(uint8_t setup, struct MAX1161X_Dev_
 
 MAX1161X_INTF_RET_TYPE max1161x_setConfigByte(uint8_t config, struct MAX1161X_Dev_t *dev);
 
-MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, int16_t *data, struct MAX1161X_Dev_t *dev);
+MAX1161X_INTF_RET_TYPE max1161x_setExternalVRef(float vref, struct MAX1161X_Dev_t *dev);
 
-MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, int16_t *data, struct MAX1161X_Dev_t *dev);
+MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, float *data, struct MAX1161X_Dev_t *dev);
 
+MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, float *data, struct MAX1161X_Dev_t *dev);
 
 #ifdef __cplusplus
 }
