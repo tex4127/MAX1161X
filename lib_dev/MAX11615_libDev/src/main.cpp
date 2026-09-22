@@ -1,12 +1,19 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <MAX1161X.h>
+#include <IIR_Filter.h>
+
+#define NUM_ICH 1
+#define IIR_ALPHA 0.2f
 
 int8_t MAX1161X_I2C_Read(uint8_t *buf, uint32_t len, void *intf_ptr);
 int8_t MAX1161X_I2C_Write(const uint8_t *buf, uint32_t len, void *intf_ptr);
 void MAX1161X_Delay_us(uint32_t period_us);
 
+int8_t filters_init(IIR_Filter_t *f, uint32_t num_filters);
+
 MAX1161X_Dev_t adc = {0};
+IIR_Filter_t filters[NUM_ICH] = {0};
 
 union MAX1161X_intf_u{
   struct {
@@ -21,6 +28,7 @@ void setup() {
   Serial.begin(115200);
   while(!Serial)
     ;
+  filters_init(filters, NUM_ICH);
   adc.read = &MAX1161X_I2C_Read;
   adc.write = &MAX1161X_I2C_Write;
   adc.delay = &MAX1161X_Delay_us;
@@ -28,7 +36,13 @@ void setup() {
 }
 
 void loop() {
-  
+  uint32_t st = millis();
+  while(millis() - st < 1000){
+    for (uint32_t i = 0; i<NUM_ICH; i++){
+      int16_t counts = 0;
+      max11
+    }
+  }
 }
 
 int8_t MAX1161X_I2C_Write(const uint8_t *buf, uint32_t len, void *intf_ptr){
@@ -59,4 +73,12 @@ int8_t MAX1161X_I2C_Read(uint8_t *buf, uint32_t len, void *intf_ptr){
 }
 void MAX1161X_Delay_us(uint32_t period_us){
   delayMicroseconds(period_us);
+}
+
+int8_t filters_init(IIR_Filter_t *f, uint32_t num_filters){
+  if (NULL == f) return 0;
+  for (uint32_t i = 0 ; i < num_filters; i++){
+    IIR_Filter_Init(IIR_ALPHA, &f[i]);
+  }
+  return 1;
 }
