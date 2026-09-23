@@ -57,25 +57,17 @@ void setup() {
 void loop() {
   uint32_t st = millis();
   uint32_t c = 0;
-  int8_t api_res = MAX1161X_STATUS_OK;
-  float volts = 0;
+  //int8_t api_res = MAX1161X_STATUS_OK;
+  uint16_t volts[4] = {0};
   while(millis() - st < 1000)
     ;
-  if (MAX1161X_STATUS_OK == max1161x_readADC_differential(MAX1161X_CS_AIN0, &volts, &adc)){
-    IIR_Filter_Update(volts, &filters[0]);
-  }
-  if (MAX1161X_STATUS_OK == max1161x_readADC_differential(MAX1161X_CS_AIN2, &volts, &adc)){
-    IIR_Filter_Update(volts, &filters[1]);
-  }
-  if (MAX1161X_STATUS_OK == max1161x_readADC_differential(MAX1161X_CS_AIN4, &volts, &adc)){
-    IIR_Filter_Update(volts, &filters[2]);
-  }
-  if (MAX1161X_STATUS_OK == max1161x_readADC_differential(MAX1161X_CS_AIN7, &volts, &adc)){
-    IIR_Filter_Update(volts, &filters[3]);
-  }
+  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[0], &adc);
+  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[1], &adc);
+  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[2], &adc);
+  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[3], &adc);
   c++;
   for (uint8_t i = 0; i < NUM_ICH; i++){
-    Serial.printf("%0.4f,", filters[i].out);
+    Serial.printf("%04x(%04f),", volts[i], (2.048f * (int16_t)volts[i])/65535);
   }
   Serial.printf("%lu\n", c);
 }
@@ -116,8 +108,8 @@ int8_t MAX1161X_I2C_Read(uint8_t *buf, uint32_t len, void *intf_ptr){
   return res;
 }
 void MAX1161X_Delay_us(uint32_t period_us){
-  //delayMicroseconds(period_us);
-  delay(1);
+  delayMicroseconds(period_us);
+  //delay(1);
 }
 
 int8_t filters_init(IIR_Filter_t *f, uint32_t num_filters){

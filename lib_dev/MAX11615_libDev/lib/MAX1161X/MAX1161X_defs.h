@@ -129,7 +129,7 @@ union MAX1161X_Config_u{
         uint8_t mode:1;
         uint8_t scan:2;
         uint8_t cs:4;
-        uint8_t reg;
+        uint8_t reg:1;
     } bits;
 };
 

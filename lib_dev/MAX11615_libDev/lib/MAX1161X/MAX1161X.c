@@ -50,7 +50,7 @@ MAX1161X_INTF_RET_TYPE max11615_init(struct MAX1161X_Dev_t *dev){
     if (NULL == dev->read) return MAX1161X_E_NULL_PTR;
     // Force set default register values
     dev->setup.byte = MAX1161X_SETUP_DEFAULT;
-    dev->setup.bits.sel = 0b000;
+    dev->setup.bits.sel = MAX1161X_SEL_INTREF_AIN_NC_IREFON;
     dev->setup.bits.clk = MAX1161X_CLK_INTERNAL;
     dev->setup.bits.pol = MAX1161X_POL_BIPOLAR;
     dev->setup.bits.rst = MAX1161X_RST_NOOP;
@@ -93,7 +93,7 @@ MAX1161X_INTF_RET_TYPE max1161x_setExternalVRef(float vref, struct MAX1161X_Dev_
     return MAX1161X_STATUS_OK;
 }
 
-MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, float *data, struct MAX1161X_Dev_t *dev){
+MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, uint16_t *data, struct MAX1161X_Dev_t *dev){
     int8_t res = MAX1161X_STATUS_OK;
     if (NULL == dev) return MAX1161X_E_NULL_PTR;
     dev->config.bits.mode = MAX1161X_MODE_SGL;
@@ -101,15 +101,16 @@ MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, float *data
     dev->config.bits.cs = channel;
     uint8_t dout[2] = {dev->setup.byte, dev->config.byte};
     res = dev->write(dout, 2, dev->intf_ptr);
-    dev->delay(dev->conversionTime);
+    //dev->delay(dev->conversionTime);
     uint8_t din[2] = {0};
     res = dev->read(din, 2, dev->intf_ptr);
     uint16_t count = ((din[0] << 8) | din[1]) << 4;
-    *data = computeVoltage(count, dev);
+    //*data = computeVoltage(count, dev);
+    *data = count;
     return res;
 }
 
-MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, float *data, struct MAX1161X_Dev_t *dev){
+MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, uint16_t *data, struct MAX1161X_Dev_t *dev){
     int8_t res = MAX1161X_STATUS_OK;
     if (NULL == dev) return MAX1161X_E_NULL_PTR;
     dev->config.bits.mode = MAX1161X_MODE_DIF;
@@ -117,11 +118,12 @@ MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, float *dat
     dev->config.bits.cs = channel;
     uint8_t dout[2] = {dev->setup.byte, dev->config.byte};
     res = dev->write(dout, 2, dev->intf_ptr);
-    dev->delay(dev->conversionTime);
+    //dev->delay(dev->conversionTime);
     uint8_t din[2] = {0};
     res = dev->read(din, 2, dev->intf_ptr);
     uint16_t count = ((din[0] << 8) | din[1]) << 4;
-    *data = computeVoltage(count, dev);
+    *data = count;
+    //*data = computeVoltage(count, dev);
     return res;
 }
 
