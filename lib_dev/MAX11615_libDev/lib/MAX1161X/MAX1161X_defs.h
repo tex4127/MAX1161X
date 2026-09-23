@@ -48,6 +48,17 @@
 #define MAX1161X_INTF_RET_TYPE                      int8_t
 #endif
 
+#define MAX1161X_GENERATE_SETUP_BYTE(sel, clk, pol, rst)    (0x80 | \
+                                                            ((sel & 0x07) << 4)| \
+                                                            ((clk & 0x01) << 3)| \
+                                                            ((pol & 0x01) << 2)| \
+                                                            ((rst & 0x01) << 1))
+
+#define MAX1161X_GENERATE_CONFIG_BYTE(scan, cs, mode)       (0x00 | \
+                                                            ((scan & 0x03) << 5)|\
+                                                            ((cs & 0x0f) << 1) | \
+                                                            (mode & 0x01))
+
 #define MAX1161X_STATUS_OK                          0
 #define MAX1161X_E_NULL_PTR                         -1
 #define MAX1161X_E_COM_FAIL                         -2
@@ -127,9 +138,9 @@ union MAX1161X_Config_u{
     uint8_t byte;
     struct{
         uint8_t mode:1;
-        uint8_t scan:2;
         uint8_t cs:4;
-        uint8_t reg:1;
+        uint8_t scan:2;
+        uint8_t reg:1;  
     } bits;
 };
 

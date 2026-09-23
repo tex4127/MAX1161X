@@ -3,7 +3,7 @@
 #include <MAX1161X.h>
 #include <IIR_Filter.h>
 
-#define __DEBUG__
+//#define __DEBUG__
 //#define __TESTING__
 
 #define NUM_ICH 4
@@ -24,7 +24,7 @@ int8_t filters_init(IIR_Filter_t *f, uint32_t num_filters);
 
 MAX1161X_Dev_t adc = {0};
 IIR_Filter_t filters[NUM_ICH] = {0};
-MAX1161X_intf_u adc_intf = {MAX11615_I2C_ADDR, &Wire};
+MAX1161X_intf_u adc_intf = {MAX11615_I2C_ADDR, &Wire1};
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -35,7 +35,7 @@ void setup() {
   delay(100);
   Serial.printf("Starting MAX1161X Testing\n");
   filters_init(filters, NUM_ICH);
-  Wire.begin();
+  adc_intf.i2c.m_i2c->begin();
   adc.intf_ptr = &adc_intf;
   adc.read = &MAX1161X_I2C_Read;
   adc.write = &MAX1161X_I2C_Write;
@@ -51,6 +51,7 @@ void setup() {
   while(1)
     delay(100);
   #endif
+  max1161x_setExternalVRef(1.024, &adc);
   Serial.printf("Chip found and configured\n");
 }
 
@@ -58,18 +59,28 @@ void loop() {
   uint32_t st = millis();
   uint32_t c = 0;
   //int8_t api_res = MAX1161X_STATUS_OK;
-  uint16_t volts[4] = {0};
-  while(millis() - st < 1000)
+  float volts[4] = {0};
+  while(millis() - st < 1000){
+      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN1, &volts[0], &adc)){
+        IIR_Filter_Update(volts[0], &filters[0]);
+      }
+      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN3, &volts[1], &adc)){
+        IIR_Filter_Update(volts[1], &filters[1]);
+      }
+      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN5, &volts[2], &adc)){
+        IIR_Filter_Update(volts[2], &filters[2]);
+      }
+      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN6, &volts[3], &adc)){
+        IIR_Filter_Update(volts[3], &filters[3]);
+      }
+      c++;
     ;
-  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[0], &adc);
-  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[1], &adc);
-  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[2], &adc);
-  max1161x_readADC_singleEnded(MAX1161X_CS_AIN4, &volts[3], &adc);
-  c++;
-  for (uint8_t i = 0; i < NUM_ICH; i++){
-    Serial.printf("%04x(%04f),", volts[i], (2.048f * (int16_t)volts[i])/65535);
   }
-  Serial.printf("%lu\n", c);
+  for (uint8_t i = 0; i < NUM_ICH; i++){
+    //Serial.printf("%04x(%04f),", volts[i], (2.048f * volts[i])/32767);
+    Serial.printf("%04f,", volts[i]);
+  }
+  Serial.printf("%lu | 0x%02x 0x%02x\n", c, adc.setup.byte, adc.config.byte);
 }
 
 int8_t MAX1161X_I2C_Write(const uint8_t *buf, uint32_t len, void *intf_ptr){
