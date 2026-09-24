@@ -58,7 +58,7 @@ MAX1161X_INTF_RET_TYPE max11615_init(struct MAX1161X_Dev_t *dev){
     res = max1161x_softReset(dev);
     if(MAX1161X_STATUS_OK != res) return res;
     // Set setup byte
-    res = max1161x_setSetupByte(MAX1161X_GENERATE_SETUP_BYTE(MAX1161X_SEL_EXTREF_REFIN_REFIN_IREFOFF,
+    res = max1161x_setSetupByte(MAX1161X_GENERATE_SETUP_BYTE(MAX1161X_SEL_INTREF_AIN_NC_IREFON,
                                                              MAX1161X_CLK_INTERNAL,
                                                              MAX1161X_POL_UNIPOLAR,
                                                              MAX1161X_RST_NOOP), dev);
@@ -105,7 +105,7 @@ MAX1161X_INTF_RET_TYPE max1161x_readADC_singleEnded(uint8_t channel, float *data
     if (NULL == dev) return MAX1161X_E_NULL_PTR;
     dev->config.bits.mode = MAX1161X_MODE_SGL;
     dev->config.bits.scan = MAX1161X_SCAN_CS_SINGLE;
-    dev->config.bits.cs = channel;
+    dev->config.bits.cs = (channel & 0x0f);
     uint8_t dout[2] = {dev->setup.byte, dev->config.byte};
     res = dev->write(dout, 2, dev->intf_ptr);
     dev->delay(dev->conversionTime);
@@ -121,7 +121,7 @@ MAX1161X_INTF_RET_TYPE max1161x_readADC_differential(uint8_t channel, float *dat
     if (NULL == dev) return MAX1161X_E_NULL_PTR;
     dev->config.bits.mode = MAX1161X_MODE_DIF;
     dev->config.bits.scan = MAX1161X_SCAN_CS_SINGLE;
-    dev->config.bits.cs = channel;
+    dev->config.bits.cs = (channel & 0x0c);
     uint8_t dout[2] = {dev->setup.byte, dev->config.byte};
     res = dev->write(dout, 2, dev->intf_ptr);
     dev->delay(dev->conversionTime);

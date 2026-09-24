@@ -6,7 +6,7 @@
 //#define __DEBUG__
 //#define __TESTING__
 
-#define NUM_ICH 4
+#define NUM_ICH 8
 #define IIR_ALPHA 0.2f
 
 union MAX1161X_intf_u{
@@ -59,28 +59,22 @@ void loop() {
   uint32_t st = millis();
   uint32_t c = 0;
   //int8_t api_res = MAX1161X_STATUS_OK;
-  float volts[4] = {0};
+  float volts[NUM_ICH] = {0};
   while(millis() - st < 1000){
-      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN1, &volts[0], &adc)){
-        IIR_Filter_Update(volts[0], &filters[0]);
-      }
-      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN3, &volts[1], &adc)){
-        IIR_Filter_Update(volts[1], &filters[1]);
-      }
-      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN5, &volts[2], &adc)){
-        IIR_Filter_Update(volts[2], &filters[2]);
-      }
-      if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(MAX1161X_CS_AIN6, &volts[3], &adc)){
-        IIR_Filter_Update(volts[3], &filters[3]);
+      for (uint8_t i = 0; i < NUM_ICH; i++){
+        if (MAX1161X_STATUS_OK == max1161x_readADC_singleEnded(0b0111, &volts[i], &adc)){
+          IIR_Filter_Update(volts[i], &filters[i]);
+        }
       }
       c++;
     ;
   }
   for (uint8_t i = 0; i < NUM_ICH; i++){
-    //Serial.printf("%04x(%04f),", volts[i], (2.048f * volts[i])/32767);
-    Serial.printf("%04f,", volts[i]);
+    //Serial.printf("%04f,", volts[i]);
+    Serial.printf("%04f,", filters[i].out);
   }
   Serial.printf("%lu | 0x%02x 0x%02x\n", c, adc.setup.byte, adc.config.byte);
+  //Serial.printf("%lu\n", c);
 }
 
 int8_t MAX1161X_I2C_Write(const uint8_t *buf, uint32_t len, void *intf_ptr){
